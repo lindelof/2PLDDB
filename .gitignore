@@ -44,3 +44,4 @@ Temporary Items
 
 # java class file
 *.class
+*.prefs
