@@ -26,22 +26,23 @@ public class Constants {
 	public static final int OP_WRITE = 2;
 	public static final int OP_MATH = 3;
 	
-	
 	// lock types
 	public static final int LOCK_READ = 11;
 	public static final int LOCK_WRITE = 12;
 	public static final int LOCK_READ_AND_WRITE = 13;
 	
-	public static final int UNINIT_STATUS = -1;
-	
-	public static String CLIENT_PREFIX = "2pl_client_";
-	
-	public static int PORT_NUMBER = 52365;
-	
-	public static int DELAY_MILLISEC = 100;
-	
-	public static int DEADLOCK_CHECK_PERIOD = 3000;
+	// transaction id
+	public static int TID_OFFSET = 100;
 	
 	public static int NOT_FOUND = -1;
-	public static int TID_OFFSET = 100;
+	public static final int UNINIT_STATUS = -1;
+	
+	public static int PORT_NUMBER = 52365;
+	public static String CLIENT_PREFIX = "2pl_client_";	
+	
+	public static int DELAY_MILLISEC = 100;
+	public static int DEADLOCK_CHECK_PERIOD = 3000;
+	
+
+
 }

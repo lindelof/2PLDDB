@@ -128,7 +128,7 @@ public class TransactionManager {
 						{
 							Pattern pattern = Pattern.compile("m(.*)\\=(.*)(\\+|\\-|\\*|\\/)(.*);");
 							Matcher m = pattern.matcher(command.trim());
-							if(m.matches())
+							if(m.matches()) // binary operation
 							{
 								String varId = m.group(1);
 								String op1 = m.group(2);
@@ -140,7 +140,18 @@ public class TransactionManager {
 	
 							}else
 							{
-								throw new Exception("Math operation format wrong!");
+								pattern = Pattern.compile("m(.*)\\=(.*);");
+								m = pattern.matcher(command.trim());
+								
+								if(m.matches()) // unary operation
+								{
+									String varId = m.group(1);
+									String op1 = m.group(2);
+									Operation op = new Operation(trans.getTransId(), Constants.OP_MATH, varId, op1, "+", "0");
+									trans.addOperation(op);
+									
+								}else								
+									throw new Exception("Math operation format wrong!");
 							}
 							
 							break;

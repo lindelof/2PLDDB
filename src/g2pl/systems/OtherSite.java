@@ -23,6 +23,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.ConnectException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import g2pl.basics.*;
 import g2pl.comm.*;
@@ -39,13 +41,16 @@ public class OtherSite implements Runnable, Comm_Site{
 	public static void main(String[] argv)
 	{
 		try{
+			
 			// setup server communication
 			Registry registry = LocateRegistry.getRegistry(Constants.PORT_NUMBER);
 			Comm_Server temp_stub = (Comm_Server) registry.lookup("2pl_server");
 			
 			int siteId = temp_stub.obtain_next_siteId();
 			
-			(new OtherSite(siteId)).run();
+			String historyPath = argv[0];
+			
+			(new OtherSite(siteId, historyPath)).run();
 			
 		}catch(ConnectException e)
 		{
@@ -57,11 +62,11 @@ public class OtherSite implements Runnable, Comm_Site{
 		}
 	}
 	
-	public OtherSite(int id) throws Exception
+	public OtherSite(int id, String historyPath) throws Exception
 	{
 		clientId = id;
 		tm = new TransactionManager(clientId);
-		tm.loadTransactions("transactions.txt");
+		tm.loadTransactions(historyPath);
 		
 		// setup server communication
 		Registry registry = LocateRegistry.getRegistry(Constants.PORT_NUMBER);	
@@ -84,10 +89,16 @@ public class OtherSite implements Runnable, Comm_Site{
 					Transaction trans = tm.popTransactions();
 					
 					if(trans == null)
+					{	
 						blocked();
+						System.out.println("*****waiting for next transaction******");
+					}
 					
 					else
 					{
+						String tag = "[T" + trans.getTransId() + "]";
+						System.out.println(tag +":\n\tStarting transaction " + trans.getTransId());
+						
 						for(Operation op: trans.getAllOperations())
 						{
 							switch(op.getType())
@@ -101,11 +112,7 @@ public class OtherSite implements Runnable, Comm_Site{
 										blocked();
 									
 									if(abort == true)
-									{
-										abort = false;
-										System.out.println("transaction aborted at site " + clientId);
 										break;
-									}
 									
 									trans.executeOperation(op);
 									break;
@@ -118,11 +125,7 @@ public class OtherSite implements Runnable, Comm_Site{
 										blocked();
 									
 									if(abort == true)
-									{
-										abort = false;
-										System.out.println("transaction aborted at site " + clientId);
 										break;
-									}
 									
 									trans.executeOperation(op);
 									break;
@@ -133,13 +136,25 @@ public class OtherSite implements Runnable, Comm_Site{
 									break;
 								}
 							}
+							
+							if(abort == true)
+								break;
+						}
+						
+						if(abort == true)
+						{
+							System.out.println("\tTransaction " + trans.getTransId() + " is aborted");
+							abort = false;
+						}else
+						{
+							// finally, commit the transaction
+							// assume synchronized data processor (which is not the focus of the project)
+							
+							trans.commit();
+							server_stub.release_lock(trans);
+							System.out.println("\tTransaction " + trans.getTransId() + " completes");
 						}
 
-						// finally, commit the transaction
-						// assume synchronized data processor (which is not the focus of the project)
-						
-						trans.commit();
-						server_stub.release_lock(trans);
 					}
 				}
 			}catch(Exception e){
@@ -156,7 +171,9 @@ public class OtherSite implements Runnable, Comm_Site{
 			
 			while(blocked)
 			{
-				System.out.print("Client " + clientId + " blocked, ");
+				System.out.print("   ");
+				print_timestamp();
+				System.out.print(" Client " + clientId + " blocked, ");
 				System.out.println("wait for events...");
 				wait();
 			}
@@ -174,6 +191,13 @@ public class OtherSite implements Runnable, Comm_Site{
 	{
 		abort = true;
 		unblock();
+	}
+	
+	private void print_timestamp()
+	{
+		Date now = new Date();
+		String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(now);
+		System.out.print("[" + timestamp + "]");
 	}
 	
 }

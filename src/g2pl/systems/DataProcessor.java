@@ -22,16 +22,43 @@ package g2pl.systems;
 import java.sql.*;
 
 public class DataProcessor {
-	
-   // JDBC driver name and database URL
-   static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
-   static final String DB_URL = "jdbc:mysql://localhost/g2pl";
-
-   //  Database credentials
-   static final String USER = "root";
-   static final String PASS = "p@ssw0rd";
+   
+   static final String DB_URL = "jdbc:sqlite:g2pl.db";
    
    static String lockObject = "";
+   
+   public static void create_database()
+   {
+	    Connection c = null;
+	    Statement stmt = null;
+	    try {
+	    	
+	    	try{
+	    	
+				Class.forName("org.sqlite.JDBC");  
+				c = DriverManager.getConnection(DB_URL);
+	    	}catch(Exception e)
+	    	{
+	    		System.out.println("Unable to connect to database");
+	    		System.exit(0);
+	    	}
+			  
+			stmt = c.createStatement();
+			String sql = 	"CREATE TABLE `g2pl_database` (" +
+				"`item` VARCHAR(50) PRIMARY KEY NOT NULL," +
+				"`value` INT(11) NOT NULL"+
+				");";
+			  
+			stmt.executeUpdate(sql);
+			stmt.close();
+			c.close();
+			  
+			System.out.println("create database successfully");	   
+	      
+	    } catch (Exception e) {
+	    	// database exists
+	    }
+   }
    
    public static int get_key(String key)
    {
@@ -44,10 +71,11 @@ public class DataProcessor {
 		   {
 		   
 		      // Register JDBC driver
-		      Class.forName("com.mysql.jdbc.Driver");
+			   Class.forName("org.sqlite.JDBC");
 	
 		      // Open a connection
-		      conn = DriverManager.getConnection(DB_URL,USER,PASS);
+		      conn = DriverManager.getConnection(DB_URL);
+		      conn.setAutoCommit(false);
 	
 		      // Execute a query
 		      stmt = conn.createStatement();
@@ -92,15 +120,17 @@ public class DataProcessor {
 		   {
 		   
 		      // Register JDBC driver
-		      Class.forName("com.mysql.jdbc.Driver");
+			   Class.forName("org.sqlite.JDBC");
 	
 		      // Open a connection
-		      conn = DriverManager.getConnection(DB_URL,USER,PASS);
+		      conn = DriverManager.getConnection(DB_URL);
+		      conn.setAutoCommit(false);
 	
 		      // Execute a query
 		      stmt = conn.createStatement();
-		      String sql = "insert into g2pl_database (item, value) VALUES ('"+key+"', "+value+") ON DUPLICATE KEY UPDATE value = "+value;
+		      String sql = "insert or replace into g2pl_database (item, value) VALUES ('"+key+"', "+value+")";
 		      int rs = stmt.executeUpdate(sql);
+		      conn.commit();
 		   
 		      // Clean-up environment
 		      stmt.close();

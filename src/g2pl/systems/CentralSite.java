@@ -22,6 +22,7 @@ package g2pl.systems;
 import g2pl.comm.*;
 import g2pl.basics.Constants;
 import g2pl.basics.Operation;
+import g2pl.basics.Pair;
 import g2pl.basics.Transaction;
 
 import java.util.*;
@@ -37,12 +38,15 @@ public class CentralSite implements Comm_Server{
 	
 	private static int siteCount = 1;
 	
+	
 	public static void main (String[] argv) {
 		
 		try {
 			 
 			// build central site
 			final CentralSite server = new CentralSite();	
+			
+			DataProcessor.create_database();
 			
 			Comm_Server stub = (Comm_Server) UnicastRemoteObject.exportObject(server, 0);
 			
@@ -116,12 +120,16 @@ public class CentralSite implements Comm_Server{
 	
 	public synchronized void check_deadlocks()
 	{
-		int transToAbort = lockmanager.checkDeadlocks();
 		
-		if(transToAbort != Constants.NOT_FOUND)
+		Pair<Integer, List<Integer>> res = lockmanager.checkDeadlocks();
+		
+		
+		if(res != null)
 		{
+			int transToAbort = res.first;
 			int siteId = Transaction.getSiteId(transToAbort);
 			
+			// abort transaction
 			try{
 				Comm_Site site_stub = get_otherSite_stub(siteId);				
 				site_stub.abort();
@@ -129,7 +137,24 @@ public class CentralSite implements Comm_Server{
 			}catch(Exception e)
 			{
 				System.out.println(e);
-		}
+			}
+			
+			// unblock sites whose operations are granted
+			List<Integer> unblocked = res.second;
+			
+			for(Integer site: unblocked)
+			{
+				try{
+					Comm_Site site_stub = get_otherSite_stub(site);				
+					site_stub.unblock();
+					
+				}catch(Exception e)
+				{
+					System.out.println(e);
+				}
+			}
+			
+			
 		}
 	}
 	

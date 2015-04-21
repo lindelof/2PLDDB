@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import g2pl.basics.*;
-
 public class WaitForGraph {
 	
 	Graph<Integer> wfg;
@@ -482,7 +480,8 @@ class Graph<T> {
 	      visit(v, cycleEdges);
 	    }
 
-	    Edge<T>[] cycles = new Edge[cycleEdges.size()];
+	    @SuppressWarnings("unchecked")
+		Edge<T>[] cycles = new Edge[cycleEdges.size()];
 	    cycleEdges.toArray(cycles);
 	    return cycles;
 	  }
@@ -676,7 +675,6 @@ class Graph<T> {
 	 * @version $Revision$
 	 * @param <T>
 	 */
-	@SuppressWarnings("unchecked")
 	class Vertex<T> {
 	  private List<Edge<T>> incomingEdges;
 
@@ -847,7 +845,8 @@ class Graph<T> {
 	   * 
 	   * @return incoming edge list
 	   */
-	  public List getIncomingEdges() {
+	  @SuppressWarnings("rawtypes")
+	public List getIncomingEdges() {
 	    return this.incomingEdges;
 	  }
 
@@ -875,7 +874,8 @@ class Graph<T> {
 	   * 
 	   * @return outgoing edge list
 	   */
-	  public List getOutgoingEdges() {
+	  @SuppressWarnings("rawtypes")
+	public List getOutgoingEdges() {
 	    return this.outgoingEdges;
 	  }
 

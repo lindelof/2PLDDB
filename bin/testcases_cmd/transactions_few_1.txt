@@ -1,9 +1,9 @@
 TRANSACTION:
 r(X);
-mX=X+1;
+mX=1;
 w(X);
 r(Y);
-mY=Y+2;
+mY=X;
 w(Y);
 TRANSACTION:
 r(A);

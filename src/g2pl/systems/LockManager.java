@@ -22,6 +22,7 @@ package g2pl.systems;
 import g2pl.basics.Constants;
 import g2pl.basics.Lock;
 import g2pl.basics.Operation;
+import g2pl.basics.Pair;
 import g2pl.basics.Transaction;
 
 import java.text.SimpleDateFormat;
@@ -82,7 +83,13 @@ public class LockManager {
 				Lock nextLock = nextOp.getLock();
 				if(is_compatible(nextLock))
 				{
-					insert_lock(nextOp.getLock());
+					Lock oldLock = find_lock(nextLock.getTransId(), nextLock.getVarId());
+					
+					if(oldLock == null)
+						insert_lock(nextOp.getLock());
+					else
+						oldLock.upgradeType(nextLock.getType());
+					
 					int siteId = Transaction.getSiteId(nextOp.getTransId());
 					unblockedOtherSites.add(siteId);
 				}
@@ -95,7 +102,7 @@ public class LockManager {
 		return unblockedOtherSites;
 	}
 	
-	public int checkDeadlocks()
+	public Pair<Integer, List<Integer>> checkDeadlocks()
 	{
 		WaitForGraph wfg = new WaitForGraph();
 		
@@ -134,11 +141,11 @@ public class LockManager {
 			
 			System.out.println("Abort transaction "+transToAbort);
 			
-			abortTransaction(transToAbort);
+			List<Integer> unblocked = abortTransaction(transToAbort);
 			
-			return transToAbort;
+			return new Pair<Integer, List<Integer>>(transToAbort, unblocked);
 		}else
-			return Constants.NOT_FOUND;
+			return null;
 	}
 	
 	public void print()
@@ -231,17 +238,25 @@ public class LockManager {
 		
 	}
 	
-	private void abortTransaction(int tid)
+	private List<Integer> abortTransaction(int tid)
 	{
 		Transaction trans = new Transaction(tid);
-		try{
+		try
+		{
+			print();
 			
 			remove_blocked_operations(trans);
-			release_locks(trans);
+			print();
+			List<Integer> unblocked = release_locks(trans);
 			
+			print();
+			
+			return unblocked;	
 		}catch(Exception e)
 		{
 			System.out.println(e);
+			
+			return new ArrayList<Integer>();
 		}
 	}
 	
@@ -278,7 +293,7 @@ public class LockManager {
 		return queueTable.get(varId).add(op);
 	}
 	
-	private Operation dequeue_operation(String varId)
+	private Operation dequeue_operation(String varId) throws Exception
 	{
 		if(!queueTable.containsKey(varId))
 			return null;
@@ -291,12 +306,17 @@ public class LockManager {
 			return null;
 		}else
 		{
-			Operation op = queueTable.get(varId).remove(0);
-			
-			if(queueTable.get(varId).size() == 0)
-				queueTable.remove(varId);
-			
-			return op;
+			// first check the next operation is compatible with current locks
+			if(is_compatible(ops.get(0).getLock()))
+			{
+				Operation op = queueTable.get(varId).remove(0);
+				
+				if(queueTable.get(varId).size() == 0)
+					queueTable.remove(varId);
+				
+				return op;
+			}else
+				return null;
 		}
 	}
 	
