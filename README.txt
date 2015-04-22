@@ -3,7 +3,7 @@ Copyright (c) 2015
 Author: Yidan(Evan) Zheng
 
 The 2PLDDB project is a centralized two phase locking database system. Please refer to the following link to know its design, algorithms and other useful information:
-https://github.com/lindelof/2PLDDB/wiki
+https://github.com/lindelof/2PLDDB/blob/master/documentation.pdf
 
 Linux
 ----------------------------------------------------------------------------
