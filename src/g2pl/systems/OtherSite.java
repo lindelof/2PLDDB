@@ -88,8 +88,8 @@ public class OtherSite implements Runnable, Comm_Site{
 					
 					if(trans == null)
 					{	
-						blocked();
 						System.out.println("*****waiting for next transaction******");
+						blocked();
 					}
 					
 					else
