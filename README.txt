@@ -40,6 +40,16 @@ SQLite Database
 	);
 4. You can connect to the database to see the variable values.	
 
+How to Install SQLite
+----------------------------------------------------------------------------
+Today, almost all the flavors of Linux OS are being shipped with SQLite. 
+To install SQLite in Windows, do the following:
+(1). Go to SQLite download page, and download precompiled binaries from Windows section: http://www.sqlite.org/download.html
+(2). you will need to download sqlite-shell-win32-*.zip and sqlite-dll-win32-*.zip zipped files.
+(3). Create a folder C:\>sqlite and unzip above two zipped files in this folder which will give you sqlite3.def, sqlite3.dll and sqlite3.exe files.
+(4). Add C:\>sqlite in your PATH environment variable and finally go to the command prompt and issue sqlite3 command, which should display a result something as below.
+
+
 How To Access SQLite
 ----------------------------------------------------------------------------
 1. sqlite3 g2pl.db // connect to database called g2pl.db
