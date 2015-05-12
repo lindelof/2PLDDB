@@ -42,8 +42,26 @@ SQLite Database
 
 How to Install SQLite
 ----------------------------------------------------------------------------
-Today, almost all the flavors of Linux OS are being shipped with SQLite. 
-To install SQLite in Windows, do the following:
+(Linux) Today, almost all the flavors of Linux OS are being shipped with SQLite. So you just issue the following command to check if you already have SQLite installed on your machine or not.
+	$sqlite3
+	SQLite version 3.7.15.2 2013-01-09 11:53:05
+	Enter ".help" for instructions
+	Enter SQL statements terminated with a ";"
+	sqlite>
+	(type .quit to quit)
+If you do not see above result, then it means you do not have SQLite installed on your Linux machine. For Unbuntu, type in the following command:
+	sudo apt-get install sqlite3 libsqlite3-dev
+Or you can follow the following steps to install SQLite:
+(1). Go to SQLite download page and download sqlite-autoconf-*.tar.gz from source code section: http://www.sqlite.org/download.html
+(2). Follow the following steps:
+	$tar xvfz sqlite-autoconf-3071502.tar.gz
+	$cd sqlite-autoconf-3071502
+	$./configure --prefix=/usr/local
+	$make
+	$make install
+(3). Verify installation by running sqlite3
+
+(Windows) To install SQLite in Windows, do the following:
 (1). Go to SQLite download page, and download precompiled binaries from Windows section: http://www.sqlite.org/download.html
 (2). you will need to download sqlite-shell-win32-*.zip and sqlite-dll-win32-*.zip zipped files.
 (3). Create a folder C:\>sqlite and unzip above two zipped files in this folder which will give you sqlite3.def, sqlite3.dll and sqlite3.exe files.
